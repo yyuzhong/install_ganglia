@@ -1,0 +1,11 @@
+[idh]
+name=Intel-Distribution-for-Apache-Hadoop-2.4.1
+baseurl=http://129.207.46.225/idh
+metadata_expire=300
+fastestmirror_enabled=1
+failovermethod=roundrobin
+priority=1
+gpgcheck=0
+enabled=1
+retries=5
+timeout=10

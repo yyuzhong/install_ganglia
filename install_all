@@ -1,0 +1,42 @@
+#!/bin/bash
+. ./nodes.conf
+
+i=0
+len=${#allnodes[@]}
+echo $len
+while [ $i -lt $len ]
+do
+    myip=${allnodes[$i]}
+    echo $myip
+    scp ./hadoop-metrics*.properties  root@$myip:/opt/cscloud/hadoop-2.2.0/etc/hadoop/
+    echo "********  copy hadoop configuration for ganglia at $myip  ********"
+    let i++
+done
+
+/opt/cscloud/hadoop-2.2.0/sbin/stop-all.sh
+/opt/cscloud/hadoop-2.2.0/sbin/start-all.sh
+
+i=0
+len=${#allnodes[@]}
+echo $len
+while [ $i -lt $len ]
+do
+    myip=${allnodes[$i]}
+    echo $myip
+    scp ./idh-local.repo  root@$myip:/etc/yum.repos.d/
+    if [ $myip = $master ]; then
+        ssh root@$myip 'sh -c "yum install ganglia ganglia-gmetad ganglia-web ganglia-gmond"'
+        scp ./gmond_master.conf  root@$myip:/etc/ganglia/gmond.conf
+        scp ./gmetad.conf  root@$myip:/etc/ganglia/
+        ssh root@$myip 'sh -c "service gmond restart"'
+        ssh root@$myip 'sh -c "service gmetad restart"'
+    else
+        ssh root@$myip 'sh -c "yum install ganglia ganglia-gmond"'
+        scp ./gmond_slave.conf  root@$myip:/etc/ganglia/gmond.conf
+        ssh root@$myip 'sh -c "service gmond restart"'
+    fi
+    echo "********  install ganglia to $myip  ********"
+    let i++
+done
+
+
